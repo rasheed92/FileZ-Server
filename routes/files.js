@@ -16,6 +16,7 @@ const User = require('../models/users');
 
 
 router.post('/add',Session_data, LimitChecker,(req, res) => {
+  console.log(req.body)
   const validating = FileValidating(req.body);
   if (validating.error) {
     res.status(400).send(validating.error);
@@ -25,7 +26,12 @@ router.post('/add',Session_data, LimitChecker,(req, res) => {
     if (!fs.existsSync(path)) {
         fs.mkdirSync(path);
     }
-   
+    let main;
+   if (req.body.folder) {
+    main=0;
+   } else {
+    main=1;
+   }
     var file = req.files.file,
       name = file.name,
       type = file.mimetype;
@@ -37,6 +43,7 @@ router.post('/add',Session_data, LimitChecker,(req, res) => {
       user: req.session_data._id,
       name: name,
       size: req.body.size,
+      main:main,
       folder:req.body.folder,
       type: type,
       public: req.body.public,
@@ -169,6 +176,23 @@ router.get('/', cors(), Session_data,(req, res) => {
 
 
 
+router.post('/move/:id', (req, res) => {
+console.log(req.params.id)
+  Files.updateOne({
+      _id: req.params.id
+    }, {
+      $set: {
+      "main":0,
+      "folder": req.body.folder
+      }
+    })
+    .then(result => {
+      res.send(`Number of updated users is ${ result.n }`);
+    }).catch(err => {
+      res.status(400).send(err);
+    });
+  // }
+});
 
 //this router use to list the Files on folder id
 router.get('/folder/:id', (req, res) => {

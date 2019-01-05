@@ -11,9 +11,13 @@ const fileSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'folder'
   },
+  
   name: {
     type: String,
     required: [true, 'You have to set file name !']
+  },
+  main: {
+    type: Number,
   },
   size: {
     type: Number,
