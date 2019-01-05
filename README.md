@@ -1,5 +1,21 @@
 # FileZ-Server
 
+## Features
+* login
+* register
+* add file
+* get all files 
+* get files by folders
+* add folders
+* middleware for Session
+* middleware for user limit
+* move file to folder
+
+
+
+
+
+
 #### register
 
 Link:[/api/user/register](http://localhost:5000/api/user/register)
@@ -55,7 +71,7 @@ file: Required
 <br><br>
 size: Required 
 <br><br>
-public: Required 0 or 1
+public: Required | 0 = private  or 1 = public
 <br><br>
 folder: folder_id or null to main folder 
 <br><br>
