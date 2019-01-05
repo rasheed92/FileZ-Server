@@ -90,6 +90,97 @@ Response:
     "__v": 0
 }
 ```
+#### get all folders
+
+Link:[/api/folder](http://localhost:5000/api/folder/)
+<br><br>
+Method: **GET**	
+<br><br>
+token: Required | user shoud be user should be authenticated
+
+Response:
+
+```
+[
+ 
+    {
+        "_id": "5c31125d87ba0800f3455dd2",
+        "name": "folder 1",
+        "user": "5c30abbb9dd573a9deac88d9",
+        "__v": 0
+    },
+    {
+        "_id": "5c3113a987ba0800f3455dd3",
+        "name": "folder 2",
+        "user": "5c30abbb9dd573a9deac88d9",
+        "__v": 0
+    }
+]
+```
+#### get all files
+
+Link:[/api/files/folder/:id](http://localhost:5000/api/files/folder/5c30c104bb23d3ac2257fa5c)
+<br><br>
+Method: **GET**	
+<br><br>
+token: Required | user shoud be user should be authenticated
+
+Response:
+
+```
+[
+    {
+        "_id": "5c310a9c026dc8af66bd973d",
+        "user": "5c30ab270ac48ca25e63be6d",
+        "name": "asset 11.png",
+        "size": 0,
+        "main": 0,
+        "type": "image/png",
+        "public": 1,
+        "FilePath": "5c30ab270ac48ca25e63be6d/350469c0-1123-11e9-b9a5-55b0e56889aeasset 11.png",
+        "__v": 0,
+        "folder": "5c30c104bb23d3ac2257fa5c"
+    },
+    {
+        "_id": "5c310aa2026dc8af66bd973e",
+        "user": "5c30ab270ac48ca25e63be6d",
+        "name": "asset 11.png",
+        "size": 0,
+        "main": 0,
+        "folder": "5c30c104bb23d3ac2257fa5c",
+        "type": "image/png",
+        "public": 1,
+        "FilePath": "5c30ab270ac48ca25e63be6d/38972d70-1123-11e9-b9a5-55b0e56889aeasset 11.png",
+        "__v": 0
+    }
+]
+```
+#### Move file to folder
+
+Link:[/api/files/move/:id](http://localhost:5000/api/files/move/5c310aa2026dc8af66bd973e)
+<br><br>
+Method: **POST**	
+<br><br>
+token: Required | user shoud be user should be authenticated
+<br><br>
+folder: Required
+<br><br>
+Response:
+
+```
+Number of updated users is 1
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
