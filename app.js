@@ -16,11 +16,22 @@ var session = require('express-session');
 var cors = require('cors')
 const CheckFiles = require('./middleware/checkFiles');
 var cookieParser = require('cookie-parser')
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 app.use(cookieParser())
 app.use(upload());
 app.use(cors({
   credentials: true,
 }));
+
+
+io.on('connection', () =>{
+  console.log('a user is connected')
+ })
+
+
+
+
 
 app.options("*", function (req, res, next) {
   //those headers used to Access-Control-Allow-Origin CORS 

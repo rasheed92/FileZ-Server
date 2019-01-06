@@ -18,12 +18,12 @@ router.get('/test', Session_data,(req, res,next) => {
 
 
 
+// this router used to get all folder 
 router.get('/', Session_data,(req, res) => {
 
   Folder.find({
     user: req.session_data._id
   })
-  .populate('user')
   .then(result => {
     res.send(result);
   }).catch(err => {
@@ -35,7 +35,7 @@ router.get('/', Session_data,(req, res) => {
 
 
 
-// this router used to add category by admin 
+// this router used to add folder 
 router.post('/add',Session_data, (req, res) => {
   const folder = new Folder({
     _id: new mongoose.Types.ObjectId(),

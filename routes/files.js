@@ -10,11 +10,12 @@ const uuidv1 = require('uuid/v1');
 const Session_data = require('../middleware/session_data');
 const jwt = require('jsonwebtoken');
 const LimitChecker = require('../middleware/limit');
+const FilesMW = require('../middleware/FilesMW');
 var cors = require('cors')
 const fs = require('fs');
 const User = require('../models/users');
 
-
+const app = express();
 router.post('/add',Session_data, LimitChecker,(req, res) => {
   console.log(req.body)
   const validating = FileValidating(req.body);
@@ -44,6 +45,7 @@ router.post('/add',Session_data, LimitChecker,(req, res) => {
       name: name,
       size: req.body.size,
       main:main,
+      bin:false,
       folder:req.body.folder,
       type: type,
       public: req.body.public,
@@ -59,7 +61,9 @@ router.post('/add',Session_data, LimitChecker,(req, res) => {
     "limit": req.session_data.limit-req.body.size
   }
 })
+
  .then(result => {
+   
       res.status(200).send("the file has been uploaded successfully")
     }).catch(err => {
       res.status(400).send(err)
@@ -79,82 +83,13 @@ router.get('/', cors(), Session_data,(req, res) => {
   res.header('Access-Control-Allow-Credentials', true);
 
 
-  var sorted = req.query.sort;
-
-  //session var used to return user info by useing jwt token
-
-  //here if there is any query for search and sort
-  if (req.query.q) {
-    if (sorted) {
-      Files
-        .find({
-          "title": req.query.q,
-        }).sort(sorted)
-
-
-        .then(result => {
-          let data = [{
-            'data': result
-          }, {
-            'session': req.session_data
-          }]
-
-          res.send(data);
-          // console.log(result)
-        }).catch(err => {
-          // console.log(err)
-          res.status(400).send(err)
-        })
-    } else {
-      //here if there is  query for search 
-      Files
-        .find({
-          "title": req.query.q,
-        })
-
-
-        .then(result => {
-          let data = [{
-            'data': result
-          }, {
-            'session': req.session_data
-          }]
-          res.send(data);
-          // console.log(result)
-        }).catch(err => {
-          // console.log(err)
-          res.status(400).send(err)
-        })
-    }
-
-
-
-  } else {
-    //here if there is only sort query 
-    if (sorted) {
-      //  console.log('+'+sorted)
-      Files.find()
-        .sort(sorted)
-        .then(result => {
-
-          let data = [{
-            'data': result
-          }, {
-            'session': req.session_data
-          }]
-          res.send(data);
-          // console.log(result)
-        }).catch(err => {
-          // console.log(err)
-          res.status(400).send(err)
-        })
-    } else {
-      console.log()
+  // var sorted = .sort;
+  console.log(req.query)
       //here without any query 
       Files.find({
         user:req.session_data._id
     })
-    .populate('user')
+    .or([req.query])
 
         .then(result => {
 
@@ -168,16 +103,16 @@ router.get('/', cors(), Session_data,(req, res) => {
         }).catch(err => {
           res.status(400).send(err)
         })
-    }
+    
 
-  }
+  
 
 })
 
 
 
-router.post('/move/:id', (req, res) => {
-console.log(req.params.id)
+router.post('/move/:id', FilesMW,(req, res) => {
+
   Files.updateOne({
       _id: req.params.id
     }, {
@@ -187,7 +122,7 @@ console.log(req.params.id)
       }
     })
     .then(result => {
-      res.send(`Number of updated users is ${ result.n }`);
+      res.send(`File Has Been Moved`);
     }).catch(err => {
       res.status(400).send(err);
     });
@@ -195,11 +130,26 @@ console.log(req.params.id)
 });
 
 //this router use to list the Files on folder id
-router.get('/folder/:id', (req, res) => {
+router.get('/folder/:id', Session_data,(req, res) => {
   Files.find({
-    folder: req.params.id
+    folder: req.params.id,
+    user:req.session_data._id
+    }) 
+    .then(result => {
+      res.send(result);
+    }).catch(err => {
+      res.send(err);
     })
-    .populate('folder')
+});
+
+
+
+//this router use to send  Files to bin
+router.get('/bin/',Session_data, (req, res) => {
+  Files.find({
+    "bin": true,
+    "user":req.session_data._id
+    }) 
     .then(result => {
       res.send(result);
     }).catch(err => {
@@ -210,9 +160,47 @@ router.get('/folder/:id', (req, res) => {
 
 
 
+//this router use to delete Files 
+router.delete('/bin/:id', FilesMW,Session_data, (req, res) => {
+  //those headers used to Access-Control-Allow-Origin
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Accept');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.header('Access-Control-Allow-Credentials', true);
+
+    User.updateOne({
+      _id: req.session_data._id
+    }, {
+      $set: {
+        "limit": req.session_data.limit+req.file_data.size
+      }
+    }).then(result => {
+    res.status(200).send(`the file has been deleted`)
+  }).catch(err => {
+    res.status(400).send(err);
+
+  });
+});
 
 
 
+//this router use to recovery  Files from bin
+router.post('/bin/:id',FilesMW, (req, res) => {
+  console.log(req.params.id)
+    Files.updateOne({
+        _id: req.params.id
+      }, {
+        $set: {
+        "bin":false,
+        }
+      })
+      .then(result => {
+        res.send(`File has been Recovery `);
+      }).catch(err => {
+        res.status(400).send(err);
+      });
+    // }
+  });
 
 
 

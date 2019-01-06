@@ -16,6 +16,10 @@ const fileSchema = mongoose.Schema({
     type: String,
     required: [true, 'You have to set file name !']
   },
+  bin: {
+    type: Boolean,
+    required: [true, 'You have to set file name !']
+  },
   main: {
     type: Number,
   },
