@@ -61,6 +61,7 @@ router.post('/register', (req, res) => {
         const user = new User({
           _id: new mongoose.Types.ObjectId(),
           name: req.body.name,
+          package:req.body.package,
           limit: req.body.limit,
           email: req.body.email,
           password: hash,
@@ -94,32 +95,6 @@ router.post('/register', (req, res) => {
 
 
 
-// to edit user profie used Auth middleware to make only that user update his profile no one else!
-// router.post('/edit/:id', Auth, (req, res) => {
-//   const validating = userValidating(req.body);
-//   var file = req.files.file,
-//     name = file.name,
-//     type = file.mimetype;
-//   var FileUud = uuidv1();
-//   var Filepath = './public/' + FileUud + name;
-//   var urlFile = FileUud + name;
-//   file.mv(Filepath)
-
-//   User.updateOne({
-//       _id: req.params.id
-//     }, {
-//       name: req.body.name,
-//       age: req.body.age,
-//       porfileImg: urlFile
-//     })
-//     .then(result => {
-//       res.status(200).send("Your profile has been Updated");
-//     }).catch(err => {
-//       res.status(400).send(err);
-//     });
-// });
-
-
 
 // to logout
 router.get('/logout/logout', (req, res) => {
@@ -133,6 +108,7 @@ function userValidating(user) {
     'limit': Joi.number(),
     'email': Joi.string().min(5).required(),
     'password': Joi.string().min(4).required(),
+    'package' : Joi.string().required(),
   }
   return Joi.validate(user, userSchema);
 }

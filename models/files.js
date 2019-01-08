@@ -35,6 +35,11 @@ const fileSchema = mongoose.Schema({
     type: String,
     required: [true, 'You have to set a file Path  !']
   },
+  
+  uptime: {
+    type: String,
+    required: [true, 'You have to set file type !']
+  },
   type: {
     type: String,
     required: [true, 'You have to set file type !']

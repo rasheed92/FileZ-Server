@@ -6,20 +6,22 @@ const Admin = require('../middleware/Admin');
 const Session_data = require('../middleware/session_data');
 const jwt = require('jsonwebtoken');
 
-//this router used to get all
 
 
-router.get('/test', Session_data,(req, res,next) => {
-
-  res.status(400).send({data: req.session_data});
- 
-})
 
 
 
 
 // this router used to get all folder 
-router.get('/', Session_data,(req, res) => {
+router.get('/', 
+
+Session_data,
+
+(req, res) => {
+
+
+  
+  
 
   Folder.find({
     user: req.session_data._id
@@ -32,7 +34,6 @@ router.get('/', Session_data,(req, res) => {
 
 
 })
-
 
 
 // this router used to add folder 

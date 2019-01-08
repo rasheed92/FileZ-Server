@@ -18,16 +18,16 @@ const CheckFiles = require('./middleware/checkFiles');
 var cookieParser = require('cookie-parser')
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+
+
+
+
 app.use(cookieParser())
 app.use(upload());
 app.use(cors({
   credentials: true,
 }));
 
-
-io.on('connection', () =>{
-  console.log('a user is connected')
- })
 
 
 
@@ -53,6 +53,10 @@ mongoose.connection.on('connected', () => {
 });
 
 
+io.on('connection', (io) =>{
+  console.log('a user is connected  '+io.id)
+})
+
 
 app.use(bodyParser.urlencoded({
   extended: false
@@ -75,7 +79,9 @@ app.use(express.json());
 // For serving images and other static data
 // app.use(express.static('public'));
 
-app.use(CheckFiles,(req, res,next) => {
+app.use(
+  // CheckFiles,
+  (req, res,next) => {
 
 next()
 },express.static('public'), );
@@ -96,3 +102,4 @@ app.use('/api/folder', folderRoutes);
 app.listen(PORT, () => {
   console.log('Running on port ' + PORT);
 });
+

@@ -8,8 +8,18 @@ const userSchema = mongoose.Schema({
     type: Number,
     required: [true, 'limit Is Required']
   },
-  password: String,
-  role: Number,
+  password: {
+    type: String,
+    required: [true, 'password is required']
+  },
+  role: {
+    type: Number,
+    required: [true, 'role is required']
+  },
+  package: {
+    type: String,
+    required: [true, 'Package type is required']
+  },
   porfileImg: String,
   email: {
     type: String,

@@ -8,16 +8,23 @@ const user = require('../models/users');
 const fileUpload = require('express-fileupload');
 const uuidv1 = require('uuid/v1');
 const Session_data = require('../middleware/session_data');
-const jwt = require('jsonwebtoken');
+
 const LimitChecker = require('../middleware/limit');
 const FilesMW = require('../middleware/FilesMW');
 var cors = require('cors')
 const fs = require('fs');
 const User = require('../models/users');
-
 const app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
+
+
+
+
+
 router.post('/add',Session_data, LimitChecker,(req, res) => {
-  console.log(req.body)
+
   const validating = FileValidating(req.body);
   if (validating.error) {
     res.status(400).send(validating.error);
@@ -33,9 +40,35 @@ router.post('/add',Session_data, LimitChecker,(req, res) => {
    } else {
     main=1;
    }
-    var file = req.files.file,
-      name = file.name,
-      type = file.mimetype;
+   var file = req.files.file;
+   var changetype = file.mimetype.split("/", 1);
+  //  console.log(changetype);
+  var type ;
+   if (changetype=='image' ) {
+    type = changetype;
+    console.log(changetype);
+   } else if(changetype=='video' ){
+    type = changetype;
+   }
+  else {
+    type = file.mimetype;
+    console.log('changetype');
+  }
+
+
+  var currentDate = new Date();
+
+  var date = currentDate.getDate();
+  var month = currentDate.getMonth(); //Be careful! January is 0 not 1
+  var year = currentDate.getFullYear();
+  var hours = currentDate.getHours();
+var minutes =  currentDate.getMinutes();
+var seconds =  currentDate.getSeconds();
+  var dateString = date + "/" +(month + 1) + "/" + year+"";
+
+      name = file.name;
+ 
+     
     var FileUud = uuidv1();
     var Filepath = path +'/'+ FileUud + name;
     var urlFile = FileUud + name;
@@ -48,12 +81,14 @@ router.post('/add',Session_data, LimitChecker,(req, res) => {
       bin:false,
       folder:req.body.folder,
       type: type,
-      public: req.body.public,
+      public: 1,
       FilePath:req.session_data._id+'/'+urlFile,
-      uptime: new Date().getTime(),
+      uptime: dateString,
 
     });
+    
  files.save()
+ 
  User.updateOne({
   _id: req.session_data._id
 }, {
@@ -74,7 +109,7 @@ router.post('/add',Session_data, LimitChecker,(req, res) => {
 });
 
 
-//this router to get all book
+//this router to get all files
 router.get('/', cors(), Session_data,(req, res) => {
     //those headers used to Access-Control-Allow-Origin CORS 
   res.header("Access-Control-Allow-Origin", "*");
@@ -84,10 +119,13 @@ router.get('/', cors(), Session_data,(req, res) => {
 
 
   // var sorted = .sort;
-  console.log(req.query)
+
       //here without any query 
       Files.find({
-        user:req.session_data._id
+        user:req.session_data._id,
+        main:1,
+        bin: false,
+
     })
     .or([req.query])
 
@@ -110,7 +148,7 @@ router.get('/', cors(), Session_data,(req, res) => {
 })
 
 
-
+//this router to move  file to folder
 router.post('/move/:id', FilesMW,(req, res) => {
 
   Files.updateOne({
@@ -122,7 +160,7 @@ router.post('/move/:id', FilesMW,(req, res) => {
       }
     })
     .then(result => {
-      res.send(`File Has Been Moved`);
+      res.send(`File has been moved`);
     }).catch(err => {
       res.status(400).send(err);
     });
@@ -133,7 +171,8 @@ router.post('/move/:id', FilesMW,(req, res) => {
 router.get('/folder/:id', Session_data,(req, res) => {
   Files.find({
     folder: req.params.id,
-    user:req.session_data._id
+    user:req.session_data._id,
+    bin: false,
     }) 
     .then(result => {
       res.send(result);
@@ -144,7 +183,7 @@ router.get('/folder/:id', Session_data,(req, res) => {
 
 
 
-//this router use to send  Files to bin
+//this router use to get  all Files in bin
 router.get('/bin/',Session_data, (req, res) => {
   Files.find({
     "bin": true,
@@ -183,6 +222,23 @@ router.delete('/bin/:id', FilesMW,Session_data, (req, res) => {
 });
 
 
+//this router use to send  Files to bin
+router.post('/bin/add/:id',FilesMW, (req, res) => {
+  console.log(req.params.id)
+    Files.updateOne({
+        _id: req.params.id
+      }, {
+        $set: {
+        "bin":true,
+        }
+      })
+      .then(result => {
+        res.send(`File has been move to trash `);
+      }).catch(err => {
+        res.status(400).send(err);
+      });
+    // }
+  });
 
 //this router use to recovery  Files from bin
 router.post('/bin/:id',FilesMW, (req, res) => {
@@ -514,7 +570,8 @@ function FileValidating(Files) {
   const FilesSchema = {
     'size': Joi.number().required(),
     'folder': Joi.string(),
-    'public': Joi.number().required()
+    'public': Joi.number().required(),
+    // 'token': Joi.string(),
   }
   return Joi.validate(Files, FilesSchema);
 }
