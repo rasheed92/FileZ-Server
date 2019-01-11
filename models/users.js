@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const userSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
   limit: {
-    type: Number,
+    type: String,
     required: [true, 'limit Is Required']
   },
   password: {

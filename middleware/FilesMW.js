@@ -8,8 +8,7 @@ function FilesUpdate(req, res, next) {
   //  check if there is a token
 
   const token = req.body.token || req.headers.token
-  console.log(req.body)
-  console.log(req.headers)
+
   if (token) {
     {
       //  decode the token and chekc if it's validate

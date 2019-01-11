@@ -8,7 +8,7 @@ const user = require('../models/users');
 const fileUpload = require('express-fileupload');
 const uuidv1 = require('uuid/v1');
 const Session_data = require('../middleware/session_data');
-
+var multer  = require('multer')
 const LimitChecker = require('../middleware/limit');
 const FilesMW = require('../middleware/FilesMW');
 var cors = require('cors')
@@ -17,7 +17,7 @@ const User = require('../models/users');
 const app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-
+var upload = multer()
 
 
 
@@ -25,22 +25,41 @@ var io = require('socket.io')(http);
 
 router.post('/add',Session_data, LimitChecker,(req, res) => {
 
+if (req.files.file) {
+  
+} else {
+  
+}
+
+
+
+// console.log(req.files)
+console.log(req.body)
+// console.log(req.files.file.data.length)
   const validating = FileValidating(req.body);
   if (validating.error) {
-    res.status(400).send(validating.error);
+    console.log(validating.error.details[0].message)
+    res.status(400).send(validating.error.details[0].message);
   } else {
 
     let path = `./public/${req.session_data._id}`;
     if (!fs.existsSync(path)) {
         fs.mkdirSync(path);
     }
+    var FolderChaek;
+    if (req.body.folder=="Main Folder") {
+      FolderChaek==''
+    }else{
+      FolderChaek=req.body.folder
+    }
     let main;
-   if (req.body.folder) {
+   if (FolderChaek) {
     main=0;
    } else {
     main=1;
    }
    var file = req.files.file;
+
    var changetype = file.mimetype.split("/", 1);
   //  console.log(changetype);
   var type ;
@@ -76,10 +95,10 @@ var seconds =  currentDate.getSeconds();
     const files = new Files({
       user: req.session_data._id,
       name: name,
-      size: req.body.size,
+      size: req.files.file.data.length,
       main:main,
       bin:false,
-      folder:req.body.folder,
+      folder:FolderChaek,
       type: type,
       public: 1,
       FilePath:req.session_data._id+'/'+urlFile,
@@ -93,7 +112,7 @@ var seconds =  currentDate.getSeconds();
   _id: req.session_data._id
 }, {
   $set: {
-    "limit": req.session_data.limit-req.body.size
+    "limit": parseInt(req.session_data.limit)-req.files.file.data.length
   }
 })
 
@@ -150,20 +169,36 @@ router.get('/', cors(), Session_data,(req, res) => {
 
 //this router to move  file to folder
 router.post('/move/:id', FilesMW,(req, res) => {
-
+console.log(req.body.folder)
+if (req.body.folder=='Main_Folder') {
   Files.updateOne({
-      _id: req.params.id
-    }, {
-      $set: {
-      "main":0,
-      "folder": req.body.folder
-      }
-    })
-    .then(result => {
-      res.send(`File has been moved`);
-    }).catch(err => {
-      res.status(400).send(err);
-    });
+    _id: req.params.id
+  }, {
+    $set: {
+    "main":1,
+    }
+  })
+  .then(result => {
+    res.send(`File has been moved`);
+  }).catch(err => {
+    res.status(400).send(err);
+  });
+} else {
+  Files.updateOne({
+    _id: req.params.id
+  }, {
+    $set: {
+    "main":0,
+    "folder": req.body.folder
+    }
+  })
+  .then(result => {
+    res.send(`File has been moved`);
+  }).catch(err => {
+    res.status(400).send(err);
+  });
+}
+
   // }
 });
 
@@ -171,6 +206,7 @@ router.post('/move/:id', FilesMW,(req, res) => {
 router.get('/folder/:id', Session_data,(req, res) => {
   Files.find({
     folder: req.params.id,
+    main:0,
     user:req.session_data._id,
     bin: false,
     }) 
@@ -211,7 +247,7 @@ router.delete('/bin/:id', FilesMW,Session_data, (req, res) => {
       _id: req.session_data._id
     }, {
       $set: {
-        "limit": req.session_data.limit+req.file_data.size
+        "limit": parseInt(req.session_data.limit)+req.file_data.size
       }
     }).then(result => {
     res.status(200).send(`the file has been deleted`)
@@ -568,10 +604,11 @@ router.post('/bin/:id',FilesMW, (req, res) => {
 //this function used for Validating
 function FileValidating(Files) {
   const FilesSchema = {
-    'size': Joi.number().required(),
+    // 'size': Joi.number().required(),
     'folder': Joi.string(),
     'public': Joi.number().required(),
-    // 'token': Joi.string(),
+    // 'files': Joi.required(),
+    'token': Joi.string(),
   }
   return Joi.validate(Files, FilesSchema);
 }

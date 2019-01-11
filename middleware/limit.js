@@ -18,13 +18,18 @@ function limitChecker(req, res, next) {
       function (err, user) {
         if (err) return res.status(500).send("There was a problem finding the user.");
         if (!user) return res.status(404).send("No user found.");
-       
-        if (req.body.size>user.limit) {
+
+        if (req.files.file) {
+          if (req.files.file.data.length>parseInt(user.limit)) {
             res.status(404).send('you have reached the limit please upgrade your package or delete some files')
         } else {
             next() 
         }
-        // console.log(req.body.size)
+        // 
+        } else {
+          res.status(404).send('file is required') 
+        }
+
         // console.log(user.limit)
        
         // console.log(Session)

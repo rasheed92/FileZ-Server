@@ -9,7 +9,7 @@ const fileUpload = require('express-fileupload');
 const Admin = require('../middleware/Admin');
 const Session_data = require('../middleware/session_data');
 const uuidv1 = require('uuid/v1');
-
+const Files = require('../models/files');
 
 
 //this router for login
@@ -58,11 +58,12 @@ router.post('/register', (req, res) => {
       if (validating.error) {
         res.status(400).send(validating.error);
       } else {
+        var limit;
         const user = new User({
           _id: new mongoose.Types.ObjectId(),
           name: req.body.name,
-          package:req.body.package,
-          limit: req.body.limit,
+          package:'free',
+          limit: 100000000,
           email: req.body.email,
           password: hash,
           role: 0,
@@ -95,6 +96,42 @@ router.post('/register', (req, res) => {
 
 
 
+// to logout
+router.get('/admin/filesinfo',Admin, (req, res) => {
+
+
+//   User.aggregate([
+//     {$group: {_id: 'total', count: {$sum: 1}}}
+// ])
+
+Files.aggregate( [
+
+  { 
+     $group: {
+        _id: 'files',
+        totalFilesUplodedSize: { $sum: '$size' } ,
+        totalFiles: {$sum: 1}
+     } 
+     
+  
+  },
+  // {$group: {_id: 'total', count: {$sum: 1}}}
+
+])
+.then(result => {
+
+    res.status(200).send(result);
+    }).catch(err => {
+      res.send(err);
+    })
+
+
+
+// res.status(200).send(x);
+});
+
+
+
 
 // to logout
 router.get('/logout/logout', (req, res) => {
@@ -105,10 +142,10 @@ router.get('/logout/logout', (req, res) => {
 function userValidating(user) {
   const userSchema = {
     'name': Joi.string().min(3).required(),
-    'limit': Joi.number(),
+    // 'limit': Joi.string(),
     'email': Joi.string().min(5).required(),
     'password': Joi.string().min(4).required(),
-    'package' : Joi.string().required(),
+    // 'package' : Joi.string().required(),
   }
   return Joi.validate(user, userSchema);
 }
