@@ -242,7 +242,7 @@ router.post('/update/',Session_data, (req, res) => {
     }
   }).then(result => {
      
-        res.status(200).send("the file has been uploaded successfully")
+        res.status(200).send("the Profile update successfully")
       }).catch(err => {
         res.status(400).send(err)
       })
