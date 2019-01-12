@@ -10,7 +10,7 @@ const Admin = require('../middleware/Admin');
 const Session_data = require('../middleware/session_data');
 const uuidv1 = require('uuid/v1');
 const Files = require('../models/files');
-
+const fs = require('fs');
 
 //this router for login
 router.post('/login', function (req, res) {
@@ -217,7 +217,11 @@ router.post('/update/',Session_data, (req, res) => {
  
   //validate porfileImg
   if (req.files) {
+    
     let path = `./public/${req.session_data._id}`;
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path);
+  }
     var file = req.files.file;
     name = file.name;
     var FileUud = uuidv1();
