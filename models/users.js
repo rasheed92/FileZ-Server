@@ -30,6 +30,10 @@ const userSchema = mongoose.Schema({
     type: String,
     required: [true, 'name Is Required'],
   },
+  uptime: {
+    type: String,
+   
+  },
 
 });
 

@@ -22,7 +22,14 @@ function limitChecker(req, res, next) {
         if (req.files.file) {
           if (req.files.file.data.length>parseInt(user.limit)) {
             res.status(404).send('you have reached the limit please upgrade your package or delete some files')
-        } else {
+        }
+         else if (user.package=='free') {
+          if (req.files.file.data.length>25000000) {
+            res.status(404).send('Maximum file size is 25 MB for free package')
+          }else{
+            next() 
+          }
+        }else {
             next() 
         }
         // 

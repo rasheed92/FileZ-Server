@@ -52,13 +52,23 @@ router.post('/login', function (req, res) {
 
 // register a new User
 router.post('/register', (req, res) => {
+
   bcrypt.genSalt(10, function (err, salt) {
     bcrypt.hash(req.body.password, salt, function (err, hash) {
       const validating = userValidating(req.body);
       if (validating.error) {
         res.status(400).send(validating.error);
       } else {
-        var limit;
+        var currentDate = new Date();
+
+    var date = currentDate.getDate();
+    var month = currentDate.getMonth(); //Be careful! January is 0 not 1
+    var year = currentDate.getFullYear();
+    var hours = currentDate.getHours();
+    var minutes =  currentDate.getMinutes();
+    var seconds =  currentDate.getSeconds();
+    var dateString = date + "/" +(month + 1) + "/" + year+"";
+
         const user = new User({
           _id: new mongoose.Types.ObjectId(),
           name: req.body.name,
@@ -67,7 +77,8 @@ router.post('/register', (req, res) => {
           email: req.body.email,
           password: hash,
           role: 0,
-          porfileImg: 'defaultUser.png'
+          porfileImg: 'defaultUser.png',
+          uptime: dateString,
 
         });
         user.save()
@@ -90,35 +101,19 @@ router.post('/register', (req, res) => {
 
   });
 
-
-
 });
 
 
 
-// to logout
+// to get files info by admin !
 router.get('/admin/filesinfo',Admin, (req, res) => {
-
-
-//   User.aggregate([
-//     {$group: {_id: 'total', count: {$sum: 1}}}
-// ])
-
-Files.aggregate( [
-
-  { 
+Files.aggregate([{ 
      $group: {
         _id: 'files',
         totalFilesUplodedSize: { $sum: '$size' } ,
         totalFiles: {$sum: 1}
-     } 
-     
-  
-  },
-  // {$group: {_id: 'total', count: {$sum: 1}}}
-
-])
-.then(result => {
+     }  },
+    ]).then(result => {
 
     res.status(200).send(result);
     }).catch(err => {
@@ -130,12 +125,124 @@ Files.aggregate( [
 // res.status(200).send(x);
 });
 
+router.get('/admin/users',Admin, (req, res) => {
+  User.find().then(result => {
+  
+      res.status(200).send(result);
+      }).catch(err => {
+        res.send(err);
+      })
+  });
+
+  router.delete('/admin/deleteUser/:id',Admin, (req, res) => {
+
+    User.deleteOne({
+      _id: req.params.id
+    }, function (err) {}).then(result => {
+    
+        res.status(200).send('user has been removed');
+        }).catch(err => {
+          res.send(err);
+        })
+    });
+    
+  
+  router.post('/admin/add',Admin, (req, res) => {
+  bcrypt.genSalt(10, function (err, salt) {
+    bcrypt.hash(req.body.password, salt, function (err, hash) {
+      const validating = userValidating(req.body);
+      if (validating.error) {
+        res.status(400).send(validating.error);
+      } else {
+        var currentDate = new Date();
+
+        var date = currentDate.getDate();
+        var month = currentDate.getMonth(); //Be careful! January is 0 not 1
+        var year = currentDate.getFullYear();
+        var hours = currentDate.getHours();
+        var minutes =  currentDate.getMinutes();
+        var seconds =  currentDate.getSeconds();
+        var dateString = date + "/" +(month + 1) + "/" + year+"";
+        
+        const user = new User({
+          _id: new mongoose.Types.ObjectId(),
+          name: req.body.name,
+          package:'free',
+          limit: 100000000,
+          email: req.body.email,
+          password: hash,
+          role: 1,
+          porfileImg: 'defaultUser.png',
+          uptime: dateString,
+
+        });
+        user.save()
+          .then(result => {
+            var token = jwt.sign({
+              id: user._id,
+            }, 'z3bool', {
+              expiresIn: 604800 // expires in 1 week
+            });
+            res.status(200).send('A new Admin has been Added');
+
+          })
+          .catch(err => {
+            res.status(401).send(err);
+          });
+      }
+    });
+
+  });
+
+
+        
+    });
+  
+
 
 
 
 // to logout
-router.get('/logout/logout', (req, res) => {
-  res.redirect('/');
+router.post('/update/',Session_data, (req, res) => {
+  console.log(req.body)
+  console.log(req.files)
+//validate name
+    var Username;
+  if (req.body.name) {
+    Username=req.body.name;
+  } else {
+    Username=req.session_data.name
+  }
+
+ 
+  //validate porfileImg
+  if (req.files) {
+    let path = `./public/${req.session_data._id}`;
+    var file = req.files.file;
+    name = file.name;
+    var FileUud = uuidv1();
+    var Filepath = path +'/'+ FileUud + name;
+    var urlFile = req.session_data._id+'/'+FileUud + name;
+    file.mv(Filepath)
+  } else {
+    urlFile=req.session_data.porfileImg
+  }
+ 
+
+  User.updateOne({
+    _id: req.session_data._id
+  }, {
+    $set: {
+      "name":Username,
+      "porfileImg":urlFile,
+    }
+  }).then(result => {
+     
+        res.status(200).send("the file has been uploaded successfully")
+      }).catch(err => {
+        res.status(400).send(err)
+      })
+    
 });
 
 //  To validate the POST PUT requestes

@@ -25,7 +25,7 @@ function Admin(req, res, next) {
           if (user.role == 1) {
             next();
           }else{
-            res.send('Sorry you are not A Admin');
+            res.status(404).send('Sorry you are not A Admin');
           }
         
         });
@@ -37,7 +37,7 @@ function Admin(req, res, next) {
     }
 
   } else {
-    res.send('You are Not Login');
+    res.status(404).send('You are Not Login');
   }
 
 
