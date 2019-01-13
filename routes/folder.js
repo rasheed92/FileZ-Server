@@ -2,42 +2,26 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Folder = require('../models/folder');
-const Admin = require('../middleware/Admin');
 const Session_data = require('../middleware/session_data');
-const jwt = require('jsonwebtoken');
 
 
 
 
-
-
-
-// this router used to get all folder 
-router.get('/', 
-
-Session_data,
-
-(req, res) => {
-
-
-  
-  
-
-  Folder.find({
-    user: req.session_data._id
+// this router used to get all folder to user by useing Session_data middleware
+router.get('/', Session_data,(req, res) => {
+    Folder.find({
+        user: req.session_data._id
+      })
+      .then(result => {
+        res.send(result);
+      }).catch(err => {
+        res.status(400).send(err)
+      })
   })
-  .then(result => {
-    res.send(result);
-  }).catch(err => {
-    res.status(400).send(err)
-  })
-
-
-})
 
 
 // this router used to add folder 
-router.post('/add',Session_data, (req, res) => {
+router.post('/add', Session_data, (req, res) => {
   const folder = new Folder({
     _id: new mongoose.Types.ObjectId(),
     name: req.body.name,
@@ -49,9 +33,6 @@ router.post('/add',Session_data, (req, res) => {
   }).catch(err => {
     res.send(err);
   })
-
-
-
 });
 
 

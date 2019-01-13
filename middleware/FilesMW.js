@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken');
 const Files = require('../models/files');
-const User = require('../models/users');
-const express = require('express');
-const app = express();
 
+
+
+//here to check file belong to same user when user want to delete the file or move it 
 function FilesUpdate(req, res, next) {
   //  check if there is a token
 

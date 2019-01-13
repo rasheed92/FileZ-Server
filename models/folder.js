@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-
-
 const folderSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
   user: {
