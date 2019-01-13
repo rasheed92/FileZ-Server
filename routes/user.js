@@ -222,18 +222,24 @@ router.post('/update/',Session_data, (req, res) => {
   //validate porfileImg
   if (req.files) {
     
-    let path = `./public/${req.session_data._id}`;
-    if (!fs.existsSync(path)) {
-      fs.mkdirSync(path);
-  }
+   //not working on heroku
+  //   let path = `./public/${req.session_data._id}`;
+  //   if (!fs.existsSync(path)) {
+  //     fs.mkdirSync(path);
+  // }
+
+  let path = `./public/`;
     var file = req.files.file;
     name = file.name;
     var FileUud = uuidv1();
     var Filepath = path +'/'+ FileUud + name;
-    var urlFile = req.session_data._id+'/'+FileUud + name;
+    // var urlFile = req.session_data._id+'/'+FileUud + name;
+    var urlFile =FileUud + name;
     file.mv(Filepath)
   } else {
-    urlFile=req.session_data.porfileImg
+    // urlFile=req.session_data.porfileImg
+
+    urlFile=porfileImg
   }
  
 

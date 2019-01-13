@@ -41,11 +41,13 @@ console.log(req.body)
     console.log(validating.error.details[0].message)
     res.status(400).send(validating.error.details[0].message);
   } else {
+    let path = `./public/`;
 
-    let path = `./public/${req.session_data._id}`;
-    if (!fs.existsSync(path)) {
-        fs.mkdirSync(path);
-    }
+    //not working on heroku
+    // let path = `./public/${req.session_data._id}`;
+    // if (!fs.existsSync(path)) {
+    //     fs.mkdirSync(path);
+    // }
     var FolderChaek;
     if (req.body.folder=="Main Folder") {
       FolderChaek==''
@@ -78,7 +80,7 @@ console.log(req.body)
   var currentDate = new Date();
 
   var date = currentDate.getDate();
-  var month = currentDate.getMonth(); //Be careful! January is 0 not 1
+  var month = currentDate.getMonth(); 
   var year = currentDate.getFullYear();
   var hours = currentDate.getHours();
 var minutes =  currentDate.getMinutes();
@@ -89,7 +91,10 @@ var seconds =  currentDate.getSeconds();
  
      
     var FileUud = uuidv1();
-    var Filepath = path +'/'+ FileUud + name;
+
+        //not working on heroku
+    // var Filepath = path +'/'+ FileUud + name;
+    var Filepath = path + FileUud + name;
     var urlFile = FileUud + name;
     file.mv(Filepath)
     const files = new Files({
@@ -101,7 +106,9 @@ var seconds =  currentDate.getSeconds();
       folder:FolderChaek,
       type: type,
       public: 1,
-      FilePath:req.session_data._id+'/'+urlFile,
+        //not working on heroku
+      // FilePath:req.session_data._id+'/'+urlFile,
+      FilePath:urlFile,
       uptime: dateString,
 
     });
