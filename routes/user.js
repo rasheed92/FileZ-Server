@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const fileUpload = require('express-fileupload');
 const Admin = require('../middleware/Admin');
+const checklogin = require('../middleware/CheckLogin');
 const Session_data = require('../middleware/session_data');
 const uuidv1 = require('uuid/v1');
 const Files = require('../models/files');
@@ -48,6 +49,9 @@ router.post('/login', function (req, res) {
 
 })
 
+router.get('/checklogin', checklogin,(req, res) => {
+  res.status(200).send('token');
+  });
 
 
 // register a new User
