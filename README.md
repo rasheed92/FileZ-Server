@@ -16,10 +16,14 @@
 * User can update his profile,
 * max file size for free package 50MB
 
-
-
-
-
+## Installation
+```
+$ npm i 
+```
+## Start !
+```
+$ npm start 
+```
 
 #### register
 
