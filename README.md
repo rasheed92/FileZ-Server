@@ -41,7 +41,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVjMzExMDNiODdiYTA4MDBmMzQ1NWRkMCI
 ```
 #### login
 
-Link:[/api/user/register](http://localhost:5000/api/user/register)
+Link:[/api/user/login](http://localhost:5000/api/user/login)
 <br><br>
 Method: **POST**	
 <br><br>
@@ -262,7 +262,7 @@ File has been move to trash
 
 #### Recovery file from Trash
 
-Link:[/api/files//bin/:id](http://localhost:5000/api/files/bin/5c38bfe334573927d79820a5)
+Link:[/api/files/bin/:id](http://localhost:5000/api/files/bin/5c38bfe334573927d79820a5)
 <br><br>
 Method: **POST**	
 <br><br>
@@ -276,7 +276,7 @@ File has been Recovery
 
 #### DELETE file in Trash
 
-Link:[/api/files//bin/add/:id](http://localhost:5000/api/files/bin/5c38bfe334573927d79820a5)
+Link:[/api/files/bin/:id](http://localhost:5000/api/files/bin/5c38bfe334573927d79820a5)
 <br><br>
 Method: **DELETE**	
 <br><br>
@@ -290,7 +290,7 @@ the file has been deleted
 
 #### Recovery file from Trash
 
-Link:[/api/files//bin/add/:id](http://localhost:5000/api/files/bin/5c38bfe334573927d79820a5)
+Link:[/api/files/bin/add/:id](http://localhost:5000/api/files/bin/5c38bfe334573927d79820a5)
 <br><br>
 Method: **DELETE**	
 <br><br>
@@ -384,7 +384,7 @@ A new Admin has been Added
 
 #### Get all users admin only!
 
-Link:[/api/user/checklogin](http://localhost:5000/api/user/checklogin/)
+Link:[/api/user/admin/users/](http://localhost:5000/api/user/admin/users/)
 <br><br>
 Method: **GET**	
 <br><br>
