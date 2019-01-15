@@ -1,15 +1,20 @@
 # FileZ-Server
 
 ## Features
-* login
-* register
-* add file
-* get all files 
-* get files by folders
-* add folders
-* middleware for Session
-* middleware for user limit
-* move file to folder
+*admin can list all users with their usage storage,
+*admin can see number of uploaded files ,
+*admin can see  usage storage,
+*admin can delete user,
+*admin can add new admin,
+*user can uploade files,
+*user can add folders,
+*user can move files to folders,
+*user can  moved this file to trash, 
+*user can delete file from trash,
+*user can sort file by type,
+*user can search on file,
+*User can update his profile,
+*max file size for free package 50MB
 
 
 
