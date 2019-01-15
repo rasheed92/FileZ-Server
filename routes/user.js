@@ -193,7 +193,7 @@ router.post('/admin/add', Admin, (req, res) => {
 
 
 
-// to logout
+// to update User name or pic
 router.post('/update/', Session_data, (req, res) => {
   //validate name
   var Username;
@@ -224,7 +224,7 @@ router.post('/update/', Session_data, (req, res) => {
      //not working on heroku
     // urlFile=req.session_data.porfileImg
 
-    urlFile = porfileImg
+    urlFile =req.session_data.porfileImg
   }
   User.updateOne({
     _id: req.session_data._id
