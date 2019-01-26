@@ -4,6 +4,11 @@ const userSchema = mongoose.Schema({
   limit: {
     type: String,
     required: [true, 'limit Is Required']
+  }, 
+  email: {
+    unique: true,
+    type: String,
+    required: [true, 'Email Is Required'],
   },
   password: {
     type: String,
@@ -18,11 +23,7 @@ const userSchema = mongoose.Schema({
     required: [true, 'Package type is required']
   },
   porfileImg: String,
-  email: {
-    type: String,
-    required: [true, 'Email Is Required'],
-    unique: true
-  },
+ 
   name: {
     type: String,
     required: [true, 'name Is Required'],

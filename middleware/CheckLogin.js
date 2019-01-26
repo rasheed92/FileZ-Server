@@ -3,6 +3,7 @@ const User = require('../models/users');
 
 //here to check use auth or not
 function checkLogin(req, res, next) {
+console.log(req)
   const token = req.body.token || req.headers.token
   //  check if there is a token
   if (token) {
@@ -29,6 +30,7 @@ function checkLogin(req, res, next) {
       }
     });
   } else {
+    console.log(req)
     return res.status(200).send({
       auth: 'notLogin'
     })

@@ -67,7 +67,7 @@ router.post('/add', Session_data, LimitChecker, (req, res) => {
     var hours = currentDate.getHours();
     var minutes = currentDate.getMinutes();
     var seconds = currentDate.getSeconds();
-    var dateString = date + "/" + (month + 1) + "/" + year + "";
+    var dateString = date + "/" + (month + 1) + "/" + year + " "+hours+":"+minutes;
 
     name = file.name;
     var FileUud = uuidv1();
@@ -94,14 +94,17 @@ router.post('/add', Session_data, LimitChecker, (req, res) => {
     });
 
     files.save()
+      global.io.emit('NewFileAdded', files);
 // here to update user limit when user add new file
-    User.updateOne({
+    User.findOneAndUpdate({
         _id: req.session_data._id
       }, {
         $set: {
           "limit": parseInt(req.session_data.limit) - req.files.file.data.length
         }
-      }).then(result => {
+
+      },{new: true}).then(result => {
+      global.io.emit('userLimitChange', result);
         res.status(200).send("the file has been uploaded successfully")
       }).catch(err => {
         res.status(400).send(err)
@@ -123,7 +126,7 @@ router.get('/', cors(), Session_data, (req, res) => {
       bin: false,
 
     })
-    .or([req.query])
+    .sort({ uptime: -1})
     .then(result => {
       let data = [{
         'data': result
@@ -142,19 +145,21 @@ router.post('/move/:id', FilesMW, (req, res) => {
 
   //Validating on folder id
   if (req.body.folder == 'Main_Folder') {
-    Files.updateOne({
+    Files.findOneAndUpdate({
         _id: req.params.id
       }, {
         $set: {
           "main": 1,
         }
       }).then(result => {
+        // console.log(result._id)
+        global.io.emit('MoveFileToFolder', result._id);
         res.send(`File has been moved`);
       }).catch(err => {
         res.status(400).send(err);
       });
   } else {
-    Files.updateOne({
+    Files.findOneAndUpdate({
         _id: req.params.id
       }, {
         $set: {
@@ -162,6 +167,7 @@ router.post('/move/:id', FilesMW, (req, res) => {
           "folder": req.body.folder
         }
       }).then(result => {
+        global.io.emit('MoveFileToFolder', result._id);
         res.send(`File has been moved`);
       }).catch(err => {
         res.status(400).send(err);
@@ -176,7 +182,7 @@ router.get('/folder/:id', Session_data, (req, res) => {
       main: 0,
       user: req.session_data._id,
       bin: false,
-    })
+    }).sort({ uptime: -1})
     .then(result => {
       res.send(result);
     }).catch(err => {
@@ -191,7 +197,7 @@ router.get('/bin/', Session_data, (req, res) => {
   Files.find({
       "bin": true,
       "user": req.session_data._id
-    })
+    }).sort({ uptime: -1})
     .then(result => {
       res.send(result);
     }).catch(err => {
@@ -209,13 +215,18 @@ router.delete('/bin/:id', FilesMW, Session_data, (req, res) => {
   res.header('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Accept');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
   res.header('Access-Control-Allow-Credentials', true);
-  User.updateOne({
+  var Userlimit=parseInt(req.session_data.limit) + req.file_data.size;
+  var FIle=req.file_data;
+
+  User.findOneAndUpdate({
     _id: req.session_data._id
   }, {
     $set: {
       "limit": parseInt(req.session_data.limit) + req.file_data.size
     }
-  }).then(result => {
+  },{new: true}).then(result => {
+    global.io.emit('userLimitChange', result);
+  global.io.emit('DeletedFile', FIle);
     res.status(200).send(`the file has been deleted`)
   }).catch(err => {
     res.status(400).send(err);
@@ -227,7 +238,7 @@ router.delete('/bin/:id', FilesMW, Session_data, (req, res) => {
 //this router use to send  Files to bin
 router.post('/bin/add/:id', FilesMW, (req, res) => {
   console.log(req.params.id)
-  Files.updateOne({
+  Files.findOneAndUpdate({
       _id: req.params.id
     }, {
       $set: {
@@ -235,6 +246,8 @@ router.post('/bin/add/:id', FilesMW, (req, res) => {
       }
     })
     .then(result => {
+      // console.log(result)
+      global.io.emit('MoveFileToTrash', result);
       res.send(`File has been move to trash `);
     }).catch(err => {
       res.status(400).send(err);
@@ -245,7 +258,7 @@ router.post('/bin/add/:id', FilesMW, (req, res) => {
 //this router use to recovery  Files from bin
 router.post('/bin/:id', FilesMW, (req, res) => {
   console.log(req.params.id)
-  Files.updateOne({
+  Files.findOneAndUpdate({
       _id: req.params.id
     }, {
       $set: {
@@ -253,6 +266,8 @@ router.post('/bin/:id', FilesMW, (req, res) => {
       }
     })
     .then(result => {
+      global.io.emit('RecoveryFileFromTrash', result);
+      
       res.send(`File has been Recovery `);
     }).catch(err => {
       res.status(400).send(err);

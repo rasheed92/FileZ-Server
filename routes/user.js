@@ -53,7 +53,7 @@ router.post('/login', function (req, res) {
 
 //check user if login
 router.get('/checklogin', checklogin, (req, res) => {
-
+  console.log(req)
   //return data from middleware
   res.status(200).send('token');
 });
@@ -61,6 +61,7 @@ router.get('/checklogin', checklogin, (req, res) => {
 
 // register a new User
 router.post('/register', (req, res) => {
+  console.log(req)
   bcrypt.genSalt(10, function (err, salt) {
     bcrypt.hash(req.body.password, salt, function (err, hash) {
       const validating = userValidating(req.body);
@@ -74,7 +75,7 @@ router.post('/register', (req, res) => {
         var hours = currentDate.getHours();
         var minutes = currentDate.getMinutes();
         var seconds = currentDate.getSeconds();
-        var dateString = date + "/" + (month + 1) + "/" + year + "";
+        var dateString = date + "/" + (month + 1) + "/" + year + " "+hours+":"+minutes;
         const user = new User({
           _id: new mongoose.Types.ObjectId(),
           name: req.body.name,
@@ -93,6 +94,7 @@ router.post('/register', (req, res) => {
             }, 'z3bool', {
               expiresIn: 604800 // expires in 1 week
             });
+            global.io.emit('NewUser', result);
             res.setHeader('token', token)
             res.status(200).send(token);
           })
@@ -130,7 +132,7 @@ router.get('/admin/filesinfo', Admin, (req, res) => {
 
 //get all user by admin
 router.get('/admin/users', Admin, (req, res) => {
-  User.find().then(result => {
+  User.find().sort({ uptime: -1}).then(result => {
 
     res.status(200).send(result);
   }).catch(err => {
@@ -140,9 +142,11 @@ router.get('/admin/users', Admin, (req, res) => {
 
 //delete user by admin
 router.delete('/admin/deleteUser/:id', Admin, (req, res) => {
+  var UserID=req.params.id;
   User.deleteOne({
     _id: req.params.id
   }, function (err) {}).then(result => {
+    global.io.emit('DeleteUser', UserID);
     res.status(200).send('user has been removed');
   }).catch(err => {
     res.send(err);
@@ -164,7 +168,7 @@ router.post('/admin/add', Admin, (req, res) => {
         var hours = currentDate.getHours();
         var minutes = currentDate.getMinutes();
         var seconds = currentDate.getSeconds();
-        var dateString = date + "/" + (month + 1) + "/" + year + "";
+        var dateString = date + "/" + (month + 1) + "/" + year + " "+hours+":"+minutes;
         const user = new User({
           _id: new mongoose.Types.ObjectId(),
           name: req.body.name,
@@ -178,6 +182,8 @@ router.post('/admin/add', Admin, (req, res) => {
         });
         user.save()
           .then(result => {
+            global.io.emit('NewUser', result);
+
             res.status(200).send('A new Admin has been Added');
           })
           .catch(err => {
@@ -190,7 +196,38 @@ router.post('/admin/add', Admin, (req, res) => {
 });
 
 
+// to update User name or pic
+router.post('/updatePackage/', Session_data, (req, res) => {
 
+  var limit;
+  var packageName;
+if (req.body.package==1) {
+  limit=1000000000;
+  packageName='economic';
+} else if (req.body.package==2) {
+  limit=10000000000;
+  packageName='standard';
+}else {
+  limit=100000000000;
+  packageName='business';
+}
+
+  User.findOneAndUpdate({
+    _id: req.session_data._id
+  }, {
+    $set: {
+      "limit": limit,
+      "package": packageName,
+    }
+  },{new: true}).then(result => {
+    console.log(result)
+    global.io.emit('userLimitChange', result);
+    res.status(200).send("You have upgraded to "+packageName+" class successfully")
+  }).catch(err => {
+    res.status(400).send(err)
+  })
+
+});
 
 
 // to update User name or pic
@@ -210,30 +247,38 @@ router.post('/update/', Session_data, (req, res) => {
     //   if (!fs.existsSync(path)) {
     //     fs.mkdirSync(path);
     // }
-
-    let path = `./public/`;
     var file = req.files.file;
-    name = file.name;
-    var FileUud = uuidv1();
-    var Filepath = path + '/' + FileUud + name;
-     //not working on heroku
-    // var urlFile = req.session_data._id+'/'+FileUud + name;
-    var urlFile = FileUud + name;
-    file.mv(Filepath)
+    var changetype = file.mimetype.split("/", 1);
+    var type;
+    if (changetype == 'image') {
+      let path = `./public/`;
+      name = file.name;
+      var FileUud = uuidv1();
+      var Filepath = path + '/' + FileUud + name;
+       //not working on heroku
+      // var urlFile = req.session_data._id+'/'+FileUud + name;
+      var urlFile = FileUud + name;
+      file.mv(Filepath)
+    }else {
+      res.status(400).send("Erorr images only allow")
+    }
+
   } else {
      //not working on heroku
     // urlFile=req.session_data.porfileImg
 
     urlFile =req.session_data.porfileImg
   }
-  User.updateOne({
+  User.findOneAndUpdate({
     _id: req.session_data._id
   }, {
     $set: {
       "name": Username,
       "porfileImg": urlFile,
     }
-  }).then(result => {
+  },{new: true}).then(result => {
+    console.log(result)
+    global.io.emit('UpdateUserProfile', result);
     res.status(200).send("the Profile update successfully")
   }).catch(err => {
     res.status(400).send(err)

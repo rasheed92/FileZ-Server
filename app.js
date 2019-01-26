@@ -16,11 +16,9 @@ var session = require('express-session');
 var cors = require('cors')
 const CheckFiles = require('./middleware/checkFiles');
 var cookieParser = require('cookie-parser')
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-
-
-
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+global.io = io; 
 
 app.use(cookieParser())
 app.use(upload());
@@ -43,7 +41,7 @@ app.options("*", function (req, res, next) {
 
 
 //  Starting MongoDB connection
-mongoose.connect('mongodb://rasheed92:141516qw@ds149414.mlab.com:49414/filez', {
+mongoose.connect('mongodb://rasheed92:123456qw@ds245512.mlab.com:45512/file-z', {
   useNewUrlParser: true
 });
 
@@ -53,9 +51,9 @@ mongoose.connection.on('connected', () => {
 });
 
 
-io.on('connection', (io) =>{
-  console.log('a user is connected  '+io.id)
-})
+// io.on('connection', (io) =>{
+//   console.log('a user is connected  '+io.id)
+// })
 
 
 app.use(bodyParser.urlencoded({
@@ -98,8 +96,17 @@ app.use('/api/user', usersRoutes);
 app.use('/api/files', filesRoutes);
 app.use('/api/folder', folderRoutes);
 
+io.on('connection', function(socket){
+  console.log('a user connected'+socket.id);
+  socket.on('disconnect', function(){
+    console.log('User Disconnected');
+  });
+
+});
 // Starting the server
-app.listen(PORT, () => {
+
+// io.listen(8000);
+server.listen(PORT, () => {
   console.log('Running on port ' + PORT);
 });
 
