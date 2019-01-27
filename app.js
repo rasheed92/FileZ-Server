@@ -41,7 +41,7 @@ app.options("*", function (req, res, next) {
 
 
 //  Starting MongoDB connection
-mongoose.connect('mongodb://rasheed92:123456qw@ds245512.mlab.com:45512/file-z', {
+mongoose.connect('mongodb://rasheed92:141516qw@ds227654.mlab.com:27654/rasheed', {
   useNewUrlParser: true
 });
 

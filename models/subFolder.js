@@ -6,18 +6,7 @@ const folderSchema = mongoose.Schema({
     ref: 'User',
     required: true
   },
-  folder: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Folder',
-  },
-  files: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'files'
-  },
-  root: {
-    type: Boolean,
-    required: [true]
-  },
+ 
   name: {
     type: String,
     required: [true, 'You have to set folder name !']

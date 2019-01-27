@@ -24,6 +24,7 @@ var upload = multer()
 
 // add new file 
 router.post('/add', Session_data, LimitChecker, (req, res) => {
+  console.log(req.body)
   const validating = FileValidating(req.body);
   if (validating.error) {
     console.log(validating.error.details[0].message)
