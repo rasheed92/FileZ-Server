@@ -31,6 +31,7 @@ router.get('/',Session_data,(req, res) => {
 // })
 Folder.find({
         folder: req.params.id,
+        user: req.session_data._id,
       }).then(result => {
         let data = [{
           'Folder': result

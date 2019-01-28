@@ -15,6 +15,9 @@ function Folder_data(req, res, next) {
         var payload = jwt.verify(token, 'z3bool');
         Files.find({
           folder: req.params.id,
+          main: 0,
+          user: req.session_data._id,
+          bin: false,
         }, {
       }, // projection
       function (err, user) {
