@@ -20,6 +20,7 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 global.io = io; 
 
+var stripe = require("stripe")("sk_test_QK27hUMZEzUtSQjtXsLfwGsa");
 app.use(cookieParser())
 app.use(upload());
 app.use(cors({
@@ -28,7 +29,22 @@ app.use(cors({
 
 
 
-
+app.post('/api/pay', function(req, res) {
+  var token = req.body.stripeToken;
+  var package = req.body.package;
+console.log(package)
+  var charge = stripe.charges.create({
+    amount: 1700, // create a charge for 1700 cents USD ($17)
+    currency: 'usd',
+    description: 'Bargain Basement Charge',
+    source: token,
+  }, function(err, charges) {
+    if (err) { console.warn(err) } else {
+      // res.status(200).send(charge)
+      
+    }
+  })
+})
 
 
 app.options("*", function (req, res, next) {
