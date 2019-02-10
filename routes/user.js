@@ -13,7 +13,7 @@ const uuidv1 = require('uuid/v1');
 const Files = require('../models/files');
 const fs = require('fs');
 
-
+const stripe = require("stripe")("sk_test_QK27hUMZEzUtSQjtXsLfwGsa");
 
 //this router for login
 router.post('/login', function (req, res) {
@@ -53,7 +53,7 @@ router.post('/login', function (req, res) {
 
 //check user if login
 router.get('/checklogin', checklogin, (req, res) => {
-  console.log(req)
+
   //return data from middleware
   res.status(200).send('token');
 });
@@ -81,6 +81,7 @@ router.post('/register', (req, res) => {
           name: req.body.name,
           package: 'free',
           limit: 100000000,
+          packageSize:100000000,
           email: req.body.email,
           password: hash,
           role: 0,
@@ -199,12 +200,33 @@ router.post('/admin/add', Admin, (req, res) => {
 // to update User name or pic
 router.post('/updatePackage/', Session_data, (req, res) => {
 
+  
+  var token = req.body.stripeToken;
+  var package = req.body.package;
+  var amount;
+  if (package=='e') {
+    amount=350
+  } else if (package=='s') {
+    amount=700
+  } else{
+    amount=1200
+  }
+console.log(package)
+  var charge = stripe.charges.create({
+    amount: amount, // create a charge for 1700 cents USD ($17)
+    currency: 'usd',
+    description: 'Bargain Basement Charge',
+    source: token,
+  }, function(err, charges) {
+    if (err) { 
+      console.warn(err) 
+    } else {
   var limit;
   var packageName;
-if (req.body.package==1) {
+if (package=='e') {
   limit=1000000000;
   packageName='economic';
-} else if (req.body.package==2) {
+} else if (package=='s') {
   limit=10000000000;
   packageName='standard';
 }else {
@@ -216,8 +238,9 @@ if (req.body.package==1) {
     _id: req.session_data._id
   }, {
     $set: {
-      "limit": limit,
+      "limit": parseInt(req.session_data.limit) + limit,
       "package": packageName,
+      "packageSize": parseInt(req.session_data.packageSize) + limit,
     }
   },{new: true}).then(result => {
     console.log(result)
@@ -226,6 +249,13 @@ if (req.body.package==1) {
   }).catch(err => {
     res.status(400).send(err)
   })
+
+      
+    }
+  })
+
+
+
 
 });
 

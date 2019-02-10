@@ -22,6 +22,10 @@ const userSchema = mongoose.Schema({
     type: String,
     required: [true, 'Package type is required']
   },
+  packageSize: {
+    type: String,
+    required: [true, 'Package type is required']
+  },
   porfileImg: String,
  
   name: {
